@@ -49,23 +49,31 @@ router.put('/:id', (req, res) => {
       where: { tag_id: req.params.id }
     })
   })
-  .then((productTags) => {
-    const tagProductIds = productTags.map(({ product_id }) => product_id);
-    // PICK IT UP HERE
+  .then((newTag) => {
+    res.json(newTag);
   })
+  .catch((err) => {
+    res.json(err)
+  });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete on tag by its `id` value
-  Tag.destroy({
-    where: {
-      id: req.params.id
+  try {
+    const deletedTag = Tag.destroy({
+      where: {
+        id: req.params.id
+      }
+    })
+
+    if (!deletedTag) {
+      res.status(404).json("Invalid Tag!");
     }
-  })
-  .then((dropTag) => {
-    res.json(dropTag);
-  })
-  .catch((err) => res.json(err));
+
+    res.status(200).json("Tag successfully deleted.");
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 module.exports = router;

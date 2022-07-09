@@ -39,19 +39,41 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   // update a category by its `id` value
-});
-
-router.delete('/:id', (req, res) => {
-  // delete a category by its `id` value
-  Category.destroy({
+  Category.update(req.body, {
     where: {
       id: req.params.id
     }
   })
-  .then((dropCat) => {
-    res.json(dropCat);
+  .then((category) => {
+    return Product.findAll({
+      where: { category_id: req.params.id }
+    })
   })
-  .catch((err) => res.json(err));
+  .then((newCat) => {
+    res.json(newCat);
+  })
+  .catch((err) => {
+    res.json(err)
+  });
+});
+
+router.delete('/:id', async (req, res) => {
+  // delete a category by its `id` value
+  try {
+    const deletedCat = Category.destroy({
+      where: {
+        id: req.params.id
+      }
+    })
+
+    if (!deletedCat) {
+      res.status(404).json("Invalid Category!");
+    }
+
+    res.status(200).json("Category successfully deleted.");
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 module.exports = router;
